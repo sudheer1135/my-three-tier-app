@@ -1,11 +1,22 @@
-FROM gradle:jdk17-alpine AS BUILD
-WORKDIR /springCRUD_build
-COPY . /springCRUD_build
-RUN gradle bootJar
+FROM gradle:7.6.4-jdk17-alpine AS BUILD
+
+WORKDIR /app
+
+COPY . .
+
+RUN gradle clean bootJar --no-daemon -x test
 
 FROM eclipse-temurin:17-jre-alpine
-ENV PORT=8080 DATABASE_PORT=5432 DATABASE_HOST=localhost
-WORKDIR /spring_CRUD
-COPY --from=BUILD /springCRUD_build/build/libs/*.jar /spring_CRUD/spring_CRUD.jar
+
+WORKDIR /app
+
+ENV PORT=8080
+ENV DATABASE_HOST=mysql-db
+ENV DATABASE_PORT=3306
+ENV DATABASE_NAME=bookDatabase
+
+COPY --from=BUILD /app/build/libs/*.jar app.jar
+
 EXPOSE 8080
-CMD java -Dserver.port=$PORT -jar spring_CRUD.jar --spring.datasource.url=jdbc:mysql://$DATABASE_HOST:$DATABASE_PORT/bookDatabase
+
+CMD java -Dserver.port=$PORT -jar app.jar --spring.datasource.url=jdbc:mysql://$DATABASE_HOST:$DATABASE_PORT/$DATABASE_NAME

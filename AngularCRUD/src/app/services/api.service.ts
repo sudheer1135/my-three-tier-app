@@ -1,11 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ApiService {
-  baseUrl: string = 'http://localhost:8080';
+  baseUrl: string = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
@@ -13,15 +14,16 @@ export class ApiService {
     return this.http.get<any>(`${this.baseUrl}/allBooks`);
   }
 
-  postBook(data: any) {
+  addBook(data: any) {
     return this.http.post<any>(`${this.baseUrl}/addBook`, data);
   }
 
-  putBook(data: any, bookId: number) {
+  updateBook(bookId: any, data: any) {
     return this.http.put<any>(`${this.baseUrl}/updateBook/${bookId}`, data);
   }
 
-  deleteBook(bookId: number) {
+  deleteBook(bookId: any) {
     return this.http.delete<any>(`${this.baseUrl}/deleteBook/${bookId}`);
   }
 }
+

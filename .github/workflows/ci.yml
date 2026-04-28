@@ -50,7 +50,7 @@ jobs:
         run: ./SpringCRUD/gradlew -p ./SpringCRUD build
         
       - name: Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
       - run: npm install --prefix ./AngularCRUD/

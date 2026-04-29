@@ -1,0 +1,46 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: bookdb
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  backend:
+    build:
+      context: ./SpringCRUD
+      dockerfile: Dockerfile
+    container_name: spring-backend
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./AngularCRUD
+      dockerfile: Dockerfile
+    container_name: angular-frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "4200:4200"
+
+  adminer:
+    image: adminer
+    container_name: adminer-ui
+    restart: always
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
+
+volumes:
+  mysql-data:

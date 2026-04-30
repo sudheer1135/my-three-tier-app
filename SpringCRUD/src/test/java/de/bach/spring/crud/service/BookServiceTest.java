@@ -1,69 +1,76 @@
 package de.bach.spring.crud.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import de.bach.spring.crud.model.Book;
 import de.bach.spring.crud.repository.BookRepository;
-import java.math.BigDecimal;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mockito;
 
-@ExtendWith(MockitoExtension.class)
+import java.util.Arrays;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+
 class BookServiceTest {
 
-    private Book book;
+    @Test
+    void shouldReturnAllBooks() {
+        BookRepository bookRepository = Mockito.mock(BookRepository.class);
+        BookService bookService = new BookService(bookRepository);
 
-    @Mock
-    private BookRepository repository;
+        Book book1 = new Book("Spring Boot", "John");
+        Book book2 = new Book("DevOps", "Sudheer");
 
-    @InjectMocks
-    private BookService service;
+        when(bookRepository.findAll()).thenReturn(Arrays.asList(book1, book2));
 
-    @BeforeEach
-    void setUp() {
-        book = new Book(null, "Spring Start Here", "9781617298691", "Java", "1/10/2021",
-                "finished reading", "5/5", BigDecimal.valueOf(28.39));
+        assertThat(bookService.getAllBooks()).hasSize(2);
+        verify(bookRepository, times(1)).findAll();
     }
 
     @Test
-    void findAllBooks() {
-        service.findAllBooks();
+    void shouldAddBook() {
+        BookRepository bookRepository = Mockito.mock(BookRepository.class);
+        BookService bookService = new BookService(bookRepository);
 
-        verify(repository).findAll();
+        Book book = new Book("Docker", "Alex");
+
+        when(bookRepository.save(book)).thenReturn(book);
+
+        Book savedBook = bookService.addBook(book);
+
+        assertThat(savedBook.getTitle()).isEqualTo("Docker");
+        assertThat(savedBook.getAuthor()).isEqualTo("Alex");
+        verify(bookRepository, times(1)).save(book);
     }
 
     @Test
-    void saveBook() {
-        when(repository.save(book)).thenReturn(book);
+    void shouldUpdateBook() {
+        BookRepository bookRepository = Mockito.mock(BookRepository.class);
+        BookService bookService = new BookService(bookRepository);
 
-        Book savedBook = service.saveBook(book);
+        Book existingBook = new Book("Old Title", "Old Author");
+        existingBook.setId(1L);
 
-        assertThat(savedBook).isEqualTo(book);
-        verify(repository).save(book);
+        Book updatedBook = new Book("New Title", "New Author");
+
+        when(bookRepository.findById(1L)).thenReturn(Optional.of(existingBook));
+        when(bookRepository.save(existingBook)).thenReturn(existingBook);
+
+        Book result = bookService.updateBook(1L, updatedBook);
+
+        assertThat(result.getTitle()).isEqualTo("New Title");
+        assertThat(result.getAuthor()).isEqualTo("New Author");
+        verify(bookRepository, times(1)).findById(1L);
+        verify(bookRepository, times(1)).save(existingBook);
     }
 
     @Test
-    void updateBook() {
-        long bookId = 2L;
-        when(repository.save(book)).thenReturn(book);
-        Book updatedBook = service.updateBook(book, bookId);
+    void shouldDeleteBook() {
+        BookRepository bookRepository = Mockito.mock(BookRepository.class);
+        BookService bookService = new BookService(bookRepository);
 
-        assertThat(updatedBook.getBookId()).isEqualTo(bookId);
-        verify(repository).save(book);
-    }
+        bookService.deleteBook(1L);
 
-    @Test
-    void deleteBook() {
-        long bookId = 2L;
-
-        service.deleteBook(bookId);
-
-        verify(repository).deleteById(bookId);
+        verify(bookRepository, times(1)).deleteById(1L);
     }
 }

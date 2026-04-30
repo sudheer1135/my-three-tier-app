@@ -42,5 +42,19 @@ services:
     depends_on:
       - db
 
+  sonarqube:
+    image: sonarqube:lts-community
+    container_name: sonarqube
+    restart: always
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-logs:/opt/sonarqube/logs
+      - sonarqube-extensions:/opt/sonarqube/extensions
+
 volumes:
   mysql-data:
+  sonarqube-data:
+  sonarqube-logs:
+  sonarqube-extensions:
